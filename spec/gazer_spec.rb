@@ -90,6 +90,23 @@ describe Gazer do
 
     end
 
+    describe "after the method call" do
+
+      it "executes the advice provided after the method is executed" do
+
+        Dog.unadvise_all
+
+        Dog.advise_after(:create) do |point|
+          Cat.get_scared
+        end
+
+        Cat.should_receive(:get_scared)
+        @dog = Dog.create
+
+      end
+
+    end
+
   end
 
 end
