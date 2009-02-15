@@ -29,11 +29,6 @@ describe Gazer do
     end
   end
 
-  after :each do
-    Dog.unadvise_all
-    Cat.unadvise_all
-  end
-
   describe "advising instance methods" do
 
     describe "before the method call" do
@@ -79,6 +74,9 @@ describe Gazer do
 
       it "executes the advice provided before the method is executed" do
 
+        Dog.unadvise_all
+        Cat.unadvise_all
+
         Dog.advise_before(:create) do |point|
           Cat.get_scared
         end
@@ -105,6 +103,77 @@ describe Gazer do
 
       end
 
+    end
+
+    describe "after instantiating an instance already" do
+
+      before :each do
+        Dog.unadvise_all
+        Cat.unadvise_all
+
+        @dog = Dog.new
+        @cat = Cat.new
+      end
+
+      it "does not execute the advice if none has been defined" do
+        @cat.should_not_receive(:hiss!)
+        @dog.bark!
+      end
+
+      it "executes the advice provided on the already-instantiated instance" do
+        Dog.advise_instances_after(:bark!) do |point|
+          @cat.hiss!
+        end
+
+        @cat.should_receive(:hiss!)
+        @dog.bark!
+      end
+
+    end
+
+  end
+
+  describe "aspect DSL" do
+    class TestAspect < Gazer::Aspect::Base
+      before instances_of(Dog) => :bark! do |point|
+        Cat.get_scared
+      end
+
+      after instances_of(Cat) => :hiss! do |point|
+        Dog.new
+      end
+
+      before Dog => :create do |point|
+        message("creating #{point.object.name}")
+      end
+
+      def self.message(text)
+      end
+    end
+
+    before :all do
+      TestAspect.apply!
+    end
+
+    before :each do 
+      @dog = Dog.new
+      @cat = Cat.new
+
+    end
+
+    it "makes the cat run away before the dog barks" do
+      Cat.should_receive(:get_scared)
+      @dog.bark!
+    end
+
+    it "creates a new dog after the cat hisses" do
+      Dog.should_receive(:new)
+      @cat.hiss!
+    end
+
+    it "messages that we are creating a new Dog" do
+      TestAspect.should_receive(:message).with("creating Dog")
+      Dog.create
     end
 
   end
