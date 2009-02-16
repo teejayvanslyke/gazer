@@ -9,7 +9,8 @@ Poor man's aspect-oriented programming for Ruby.
 == FEATURES/PROBLEMS:
 
 * Elegant DSL
-* before & after pointcuts
+* before & after pointcuts.
+* Rails integration.
 
 == ROADMAP:
 
