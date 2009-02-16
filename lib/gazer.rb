@@ -8,4 +8,5 @@ end
 
 require 'gazer/object_extensions'
 require 'gazer/aspect'
+require 'gazer/rails' if defined?(RAILS_ENV)
 
