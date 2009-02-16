@@ -1,4 +1,5 @@
-== Gazer
+Gazer
+=====
 
 Gazer is a poor man's aspect-oriented programming framework for Ruby.
 
@@ -6,7 +7,8 @@ Gazer is a poor man's aspect-oriented programming framework for Ruby.
 * Elegant DSL.
 * Integration into Rails.
 
-== Installation
+Installation
+============
 
 
 
