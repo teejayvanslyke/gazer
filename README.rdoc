@@ -1,32 +1,62 @@
 = gazer
 
-* FIX (url)
+* http://github.com/teejayvanslyke/gazer
 
 == DESCRIPTION:
 
-FIX (describe your package)
+Poor man's aspect-oriented programming for Ruby.
 
 == FEATURES/PROBLEMS:
 
-* FIX (list of features or problems)
+* Elegant DSL
+* before & after pointcuts
+
+== ROADMAP:
+
+* Locking down Object monkeypatching scheme.
+* More selectors and pointcuts.
+* Regular-expression-based pointcuts.
+* <tt>:only</tt> and <tt>except</tt> options for Rails helper.
 
 == SYNOPSIS:
 
-  FIX (code sample of usage)
+Gazer's DSL is accessible to subclasses of Gazer::Aspect::Base.
 
-== REQUIREMENTS:
+  class LoggingAspect < Gazer::Aspect::Base
 
-* FIX (list of requirements)
+    before instances_of(Article) => :create do |point|
+      puts "Creating article"
+    end
+
+    after instances_of([Article, Comment]) => :save do |point|
+      puts "Saved #{point.object}."
+    end
+
+  end
+
+I have also provided a Rails generator for generating aspects for 
+your project.  Simply execute the following:
+
+  $ script/generate aspect logging
+
+A template will be created at <tt>app/aspects/logging_aspect.rb</tt> 
+for your aspect-oriented pleasure.
+
+To include an aspect for a given controller, use the aspect class method:
+
+  class MyController < ApplicationController
+    aspect :logging
+  end
 
 == INSTALL:
 
-* FIX (sudo gem install, anything else)
+  $ sudo gem install teejayvanslyke-gazer
 
 == LICENSE:
 
 (The MIT License)
 
-Copyright (c) 2009 FIXME full name
+Copyright (c) 2009 T.J. VanSlyke
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
