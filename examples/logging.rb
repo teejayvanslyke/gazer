@@ -28,6 +28,10 @@ class LoggingAspect < Gazer::Aspect::Base
   after Employee => :new do |point|
     puts "Created #{point.object}."
   end
+
+  after (/^.*$/) => :new do |point|
+    puts "I just created a new object.  What is it?  It's a #{point.object.class}!"
+  end
 end
 
 class SecurityAspect < Gazer::Aspect::Base

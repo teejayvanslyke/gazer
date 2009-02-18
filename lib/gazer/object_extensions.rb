@@ -4,6 +4,7 @@ module Gazer
 
     module ClassMethods
       def advise(sym, block)
+        puts "ADVISE #{self} #{sym}"
         @advice ||= {}
         @advice[sym] ||= []
         @advice[sym] << block

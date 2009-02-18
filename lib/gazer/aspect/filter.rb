@@ -2,11 +2,20 @@ module Gazer
   module Aspect
     class Filter
       def initialize(expr)
-        if expr.is_a?(Array)
+        if    expr.is_a?(Array)
           @types = expr
+        elsif expr.is_a?(Regexp)
+          @types = []
+          ObjectSpace.each_object(Class) do |c|
+            puts "processing #{c}"
+            unless c === Class
+              @types << c if c.name =~ expr
+            end
+          end
         else
           @types = [ expr ]
         end
+        puts "i got out alive"
       end
 
       def advise_before(sym, &block)
