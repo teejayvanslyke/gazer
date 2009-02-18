@@ -15,6 +15,7 @@ Poor man's aspect-oriented programming for Ruby.
 == ROADMAP:
 
 * Locking down Object monkeypatching scheme.
+* Mutations API to allow accessing methods at any point in their mutation lifecycle.
 * More selectors and pointcuts.
 * Regular-expression-based pointcuts.
 * <tt>:only</tt> and <tt>except</tt> options for Rails helper.
