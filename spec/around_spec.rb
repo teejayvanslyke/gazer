@@ -1,43 +1,11 @@
-require File.dirname(__FILE__) + '/spec_helper.rb'
-
-def push(element)
-  $queue << element
-end
+$dir = File.dirname(__FILE__)
+require $dir + '/spec_helper.rb'
+require $dir + '/fixtures/bananas'
 
 describe "advising around methods" do
 
-  # == Setup
-
-  class Banana
-    class << self
-      def plant!;     push('D'); end
-      def cut_down!;  push('E'); end
-    end
-    def initialize; push('I'); end
-    def peel!; push('U'); end
-    def pick!; push('Y'); end
-    def eat!;  push('M'); end
-  end
-
-  class MockAspect < Gazer::Aspect::Base
-
-    around instances_of(Banana) => :peel! do |point|
-      point.object.pick!
-      point.yield
-      point.object.eat!
-    end
-
-    around Banana => :new do |point|
-      Banana.plant!
-      banana = point.yield
-      Banana.cut_down!
-      banana
-    end
-
-  end
-
   before :all do
-    MockAspect.apply!
+    BananaAspect.apply!
   end
 
   before :each do
@@ -56,6 +24,10 @@ describe "advising around methods" do
   it "executes the operations in the correct order for the class advice" do
     Banana.new
     $queue.should == %w(D I E)
+  end
+
+  after :all do
+    Banana.unadvise_all
   end
 
 end

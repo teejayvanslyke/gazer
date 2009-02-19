@@ -27,7 +27,9 @@ module Gazer
         # method User#__login_1__ will be created.  If I advise User#login 
         # again, a method User#__login_2__ will be created.  
         def apply!
+          return if @already_applied
           pointcuts.each do |pc| pc.apply! end
+          @already_applied = true
         end
 
         # Execute a block of code immediately before the execution of a given
