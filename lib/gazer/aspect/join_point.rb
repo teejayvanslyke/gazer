@@ -2,7 +2,11 @@ require 'ostruct'
 
 module Gazer
   module Aspect
-    class JoinPoint < OpenStruct; end
+    class JoinPoint < OpenStruct
+      def yield
+        self.block.call
+      end
+    end
   end
 end
 

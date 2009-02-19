@@ -116,8 +116,8 @@ module Gazer
           block.call(
             Gazer::Aspect::JoinPoint.new(:object => self,
                           :method => sym, 
-                          :args   => args))
-          __send__ hook, *args  
+                          :args   => args,
+                          :block  => lambda { __send__ hook, *args }))
         end
       end
 
