@@ -5,12 +5,14 @@ module Gazer
         @selector = selector
         @block    = block
       end
+      
+      def remove!; end
     end
 
     class BeforePointcut < Pointcut
       def apply!
         @selector.keys.each do |key|
-          Filter.new(key).advise_before(@selector[key], &@block)
+          BeforeFilter.new(key, @selector[key], &@block).apply!
         end
       end
     end
@@ -18,7 +20,7 @@ module Gazer
     class AfterPointcut < Pointcut
       def apply!
         @selector.keys.each do |key|
-          Filter.new(key).advise_after(@selector[key], &@block)
+          AfterFilter.new(key, @selector[key], &@block).apply!
         end
       end
     end
@@ -26,7 +28,7 @@ module Gazer
     class AroundPointcut < Pointcut
       def apply!
         @selector.keys.each do |key|
-          Filter.new(key).advise_around(@selector[key], &@block)
+          AroundFilter.new(key, @selector[key], &@block).apply!
         end
       end
     end

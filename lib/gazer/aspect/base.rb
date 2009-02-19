@@ -32,6 +32,10 @@ module Gazer
           @already_applied = true
         end
 
+        def remove!
+          pointcuts.each do |pc| pc.remove! end
+        end
+
         # Execute a block of code immediately before the execution of a given
         # method.
         def before(selector, &block)

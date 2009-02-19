@@ -13,4 +13,23 @@ describe "when applying aspects" do
     $queue.should == %w(D I E)
   end
 
+  it "removes all associated advice if remove! is called" do
+    pending
+    BananaAspect.apply!
+    BananaAspect.remove!
+    Banana.new
+    $queue.should == []
+  end
+
+  it "doesn't try to remove advice more than once" do
+    pending
+    lambda {
+      BananaAspect.apply!
+      BananaAspect.remove!
+      BananaAspect.remove!
+      Banana.new
+      $queue.should == []
+    }.should_not raise_error
+  end
+
 end
