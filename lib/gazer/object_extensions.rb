@@ -3,35 +3,6 @@ module Gazer
   module ObjectExtensions
 
     module ClassMethods
-      def advise(sym, block)
-        @advice ||= {}
-        @advice[sym] ||= []
-        @advice[sym] << block
-      end
-
-      def advice
-        @advice ||= {}
-      end
-
-      def advice_for(sym)
-        @advice[sym]
-      end
-
-      def backup_method(sym)
-        id = "__#{sym}_#{backup_methods_for(sym).size}__"
-        alias_method id, sym        # Backup original method
-        private id                  # Make backup private
-        @backup_methods_for ||= {}
-        @backup_methods_for[sym] ||= []
-        @backup_methods_for[sym] << id
-        return id
-      end
-
-      def backup_methods_for(sym)
-        @backup_methods_for ||= {}
-        @backup_methods_for[sym] ||= []
-      end
-
       def unadvise_all
         advice.each do |sym, arr|
           code = <<-CODE
@@ -44,59 +15,29 @@ module Gazer
         end
       end
 
+      def advice_for(sym)
+        @advice[sym]
+      end
+
       def advise_before(sym, &block)
         return unless respond_to?(sym)
         advise(sym, block)
-        code = <<-CODE
-          class << self
-            hook = backup_method(#{sym.inspect})
-            define_method #{sym.inspect} do |*args|    
-              self.advice_for(#{sym.inspect}).last.call(
-                Gazer::Aspect::JoinPoint.new(:object => self,
-                              :method => #{sym.inspect}, 
-                              :args   => args))
-              __send__ hook, *args  # Invoke backup
-            end
-          end
-        CODE
-        instance_eval(code)
+        instance_eval(code_for_defining_method(sym, 
+          [code_for_advice(sym), code_for_original(sym)]))
       end
 
       def advise_around(sym, &block)
         return unless respond_to?(sym)
         advise(sym, block)
-        code = <<-CODE
-          class << self
-            hook = backup_method(#{sym.inspect})
-            define_method #{sym.inspect} do |*args|    
-              self.advice_for(#{sym.inspect}).last.call(
-                Gazer::Aspect::JoinPoint.new(:object => self,
-                              :method => #{sym.inspect}, 
-                              :args   => args))
-              __send__ hook, *args  # Invoke backup
-            end
-          end
-        CODE
-        instance_eval(code)
+        instance_eval(code_for_defining_method(sym, 
+          [code_for_advice(sym), code_for_original(sym)]))
       end
 
       def advise_after(sym, &block)
         return unless respond_to?(sym)
         advise(sym, block)
-        code = <<-CODE
-          class << self
-            hook = backup_method(#{sym.inspect})
-            define_method #{sym.inspect} do |*args|    
-              rval = __send__ hook, *args  # Invoke backup
-              self.advice_for(#{sym.inspect}).last.call(
-                Gazer::Aspect::JoinPoint.new(:object => self,
-                              :method => #{sym.inspect}, 
-                              :args   => args))
-              return rval
-            end
-          end
-        CODE
-        instance_eval(code)
+        instance_eval(code_for_defining_method(sym, 
+          [code_for_original(sym), code_for_advice(sym)]))
       end
 
       def advise_instances_before(sym, &block)
@@ -132,6 +73,53 @@ module Gazer
           return rval
         end
       end
+
+      private
+      def code_for_defining_method(sym, parts)
+        code = <<-CODE
+          class << self
+            hook = backup_method(#{sym.inspect})
+            define_method #{sym.inspect} do |*args|    
+              #{parts.join("\n")}
+            end
+          end
+        CODE
+      end
+
+      def code_for_original(sym)
+        "__send__ hook, *args"
+      end
+
+      def code_for_advice(sym)
+        "self.advice_for(#{sym.inspect}).last.call("+
+        "Gazer::Aspect::JoinPoint.new(:object => self, :method => #{sym.inspect}, :args => args))"
+      end
+
+      def advise(sym, block)
+        @advice ||= {}
+        @advice[sym] ||= []
+        @advice[sym] << block
+      end
+
+      def advice
+        @advice ||= {}
+      end
+
+      def backup_method(sym)
+        id = "__#{sym}_#{backup_methods_for(sym).size}__"
+        alias_method id, sym        # Backup original method
+        private id                  # Make backup private
+        @backup_methods_for ||= {}
+        @backup_methods_for[sym] ||= []
+        @backup_methods_for[sym] << id
+        return id
+      end
+
+      def backup_methods_for(sym)
+        @backup_methods_for ||= {}
+        @backup_methods_for[sym] ||= []
+      end
+
     end
 
   end
