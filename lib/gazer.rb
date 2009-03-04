@@ -6,6 +6,7 @@ module Gazer
   VERSION = '0.0.1'
 end
 
+require 'gazer/mutation'
 require 'gazer/object_extensions'
 require 'gazer/aspect'
 require 'gazer/rails' if defined?(RAILS_ENV)
