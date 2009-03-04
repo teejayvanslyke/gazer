@@ -24,34 +24,15 @@ module Gazer
       end
 
       def advise_around(sym, &block)
-        return unless respond_to?(sym)
-        advise(sym, block)
-        code_for_around = <<-CODE
-          self.advice_for(#{sym.inspect}).last.call(
-            Gazer::Aspect::JoinPoint.new(:object => self,
-                          :method => #{sym.inspect}, 
-                          :args   => args,
-                          :block  => lambda { __send__ hook, *args }))
-        CODE
-        instance_eval(code_for_defining_method(sym, [code_for_around]))
+        AroundMutation.new(self, sym, &block)
       end
 
       def advise_after(sym, &block)
-        return unless respond_to?(sym)
-        advise(sym, block)
-        instance_eval(code_for_defining_method(sym, 
-          [code_for_original(sym), code_for_advice(sym)]))
+        AfterMutation.new(self, sym, &block)
       end
 
       def advise_instances_before(sym, &block)
-        hook = backup_method(sym)
-        define_method sym do |*args|    
-          block.call(
-            Gazer::Aspect::JoinPoint.new(:object => self,
-                          :method => sym, 
-                          :args   => args))
-          __send__ hook, *args  # Invoke backup
-        end
+        BeforeInstanceMutation.new(self, sym, &block)
       end
 
       def advise_instances_around(sym, &block)
